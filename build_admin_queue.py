@@ -106,36 +106,40 @@ ws.row_dimensions[5].height = 34   # big number
 ws.row_dimensions[6].height = 15   # label
 ws.row_dimensions[7].height = 14   # subtitle
 
-def style_card(c0, c1, label, subtitle, accent, formula):
+def style_card(c0, c1, label, subtitle, accent, formula, r0=4, big_size=26):
+    """A KPI card occupying columns c0..c1 across rows r0..r0+3."""
     L, R = get_column_letter(c0), get_column_letter(c1)
+    ws.row_dimensions[r0].height = 5       # accent bar
+    ws.row_dimensions[r0 + 1].height = 34  # big number
+    ws.row_dimensions[r0 + 2].height = 15  # label
+    ws.row_dimensions[r0 + 3].height = 14  # subtitle
     # accent bar
-    ws.merge_cells(f"{L}4:{R}4")
-    ws[f"{L}4"].fill = PatternFill("solid", fgColor=accent)
-    # number
-    ws.merge_cells(f"{L}5:{R}5")
-    n = ws[f"{L}5"]; n.value = formula
-    n.font = Font(size=26, bold=True, color=accent)
+    ws.merge_cells(f"{L}{r0}:{R}{r0}")
+    ws[f"{L}{r0}"].fill = PatternFill("solid", fgColor=accent)
+    # number / value
+    ws.merge_cells(f"{L}{r0+1}:{R}{r0+1}")
+    n = ws[f"{L}{r0+1}"]; n.value = formula
+    n.font = Font(size=big_size, bold=True, color=accent)
     n.alignment = Alignment(horizontal="left", vertical="center", indent=1)
     # label
-    ws.merge_cells(f"{L}6:{R}6")
-    lb = ws[f"{L}6"]; lb.value = label
+    ws.merge_cells(f"{L}{r0+2}:{R}{r0+2}")
+    lb = ws[f"{L}{r0+2}"]; lb.value = label
     lb.font = Font(size=9, bold=True, color=SLATE)
     lb.alignment = Alignment(horizontal="left", vertical="center", indent=1)
     # subtitle
-    ws.merge_cells(f"{L}7:{R}7")
-    sb = ws[f"{L}7"]; sb.value = subtitle
+    ws.merge_cells(f"{L}{r0+3}:{R}{r0+3}")
+    sb = ws[f"{L}{r0+3}"]; sb.value = subtitle
     sb.font = Font(size=8, color=SLATE)
     sb.alignment = Alignment(horizontal="left", vertical="center", indent=1)
     # white body + outline border
-    for r in range(5, 8):
+    for r in range(r0 + 1, r0 + 4):
         for c in range(c0, c1 + 1):
-            cell = ws.cell(row=r, column=c)
-            cell.fill = PatternFill("solid", fgColor=WHITE)
+            ws.cell(row=r, column=c).fill = PatternFill("solid", fgColor=WHITE)
     for c in range(c0, c1 + 1):
-        for r in range(4, 8):
+        for r in range(r0, r0 + 4):
             cur = ws.cell(row=r, column=c).border
-            top = Side(style="thin", color=HAIR) if r == 4 else cur.top
-            bot = Side(style="thin", color=HAIR) if r == 7 else cur.bottom
+            top = Side(style="thin", color=HAIR) if r == r0 else cur.top
+            bot = Side(style="thin", color=HAIR) if r == r0 + 3 else cur.bottom
             left = Side(style="thin", color=HAIR) if c == c0 else cur.left
             right = Side(style="thin", color=HAIR) if c == c1 else cur.right
             ws.cell(row=r, column=c).border = Border(left=left, right=right, top=top, bottom=bot)
@@ -143,8 +147,31 @@ def style_card(c0, c1, label, subtitle, accent, formula):
 for (c0, c1), (label, sub, accent, formula) in zip(card_cols, cards):
     style_card(c0, c1, label, sub, accent, formula)
 
+# ---- second band: Top Priority card (dynamic text + color) ----------------
+# Returns the most urgent priority currently set in the Priority column (D),
+# or "No priority set" if the column is empty.
+TOP_PRIO_FORMULA = (
+    f'=IFS('
+    f'COUNTIF({DATA_RANGE_PRIO},"Critical")>0,"Critical",'
+    f'COUNTIF({DATA_RANGE_PRIO},"High")>0,"High",'
+    f'COUNTIF({DATA_RANGE_PRIO},"Medium")>0,"Medium",'
+    f'COUNTIF({DATA_RANGE_PRIO},"Low")>0,"Low",'
+    f'TRUE,"No priority set")'
+)
+style_card(1, 3, "TOP PRIORITY", "Highest in the queue right now",
+           INK, TOP_PRIO_FORMULA, r0=9, big_size=22)
+# colour the Top Priority value cell to match the priority it shows
+TOP_CELL = "A10:C10"
+for val, fill, txt in [("Critical", "F7D7D7", RED), ("High", "FCE6CE", ORANGE),
+                       ("Medium", "FFF1C9", "9A7B0A"), ("Low", "DCEFDD", GREEN)]:
+    ws.conditional_formatting.add(
+        TOP_CELL,
+        CellIsRule(operator="equal", formula=[f'"{val}"'],
+                   fill=PatternFill("solid", fgColor=WHITE),
+                   font=Font(size=22, bold=True, color=txt)))
+
 # ---- table ----------------------------------------------------------------
-HEADER_ROW = 10
+HEADER_ROW = 15
 headers = ["Request", "Requester", "Application(s)", "Priority",
            "Status", "Jira #", "Sprint", "Submitted", "Notes"]
 for c, h in enumerate(headers, start=1):
