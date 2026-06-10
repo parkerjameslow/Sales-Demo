@@ -8,8 +8,34 @@ A Microsoft-based intake workflow for demo change requests:
 
 | File | What it does |
 |------|--------------|
-| `Demo-Request-Queue.xlsx` | The deliverable: an Excel workbook with a **New Request** intake sheet, a **Queue** triage table (the heart of it), and a **Read Me** tab |
-| `build_queue_workbook.py` | The generator that builds the `.xlsx` (re-run to tweak fields/colors) |
+| `Admin-Queue.xlsx` | **The admin dashboard** in Excel — KPI cards + filterable request table |
+| `build_admin_queue.py` | Generator for `Admin-Queue.xlsx` (re-run to tweak data/colors) |
+| `build_admin_queue.gs` | **The same dashboard for Google Sheets** — paste into script.google.com and run |
+| `Demo-Request-Queue.xlsx` | Intake workbook: a **New Request** form sheet + a **Queue** triage table |
+| `build_queue_workbook.py` | Generator for `Demo-Request-Queue.xlsx` |
+
+## Admin Queue dashboard (Excel + Google Sheets)
+
+A viewing queue for all requests, modeled on the admin-dashboard mockup:
+
+- **5 KPI cards** — Pending Review / In Progress / Scheduled / Completed / Critical.
+  These are **live `COUNTIF` formulas**: change a Status and the counts update.
+- **Request table** — Request, Requester, Application(s), Priority, Status, Jira #,
+  Sprint, Submitted, Notes. Priority is color-coded; Status shows as colored pills;
+  both are dropdowns. Header is frozen with a filter (this replaces the mockup's
+  search box + filter chips — click a column's filter to search/narrow).
+- The mockup's **Approve** buttons map to the **Status dropdown** — set a row to
+  *Approved* / *Scheduled* / *In Progress* to move it through the pipeline.
+
+**Excel:** open `Admin-Queue.xlsx`. To regenerate: `python3 build_admin_queue.py`.
+
+**Google Sheets:** go to [script.google.com](https://script.google.com) → New project →
+paste in `build_admin_queue.gs` → Run `buildAdminQueue` → authorize → open the link
+printed in **View → Logs**. It builds the same dashboard as a live Google Sheet.
+
+---
+
+## Intake workbook (Demo-Request-Queue.xlsx)
 
 ## The workbook
 
