@@ -1,13 +1,56 @@
 # Demo Request — Form & Queue
 
-A Microsoft-based intake workflow for demo change requests:
+An intake workflow for demo change requests:
 
 **Reps submit a request → it lands in a central Queue → you triage it (priority, sprint, status).**
 
-## What's in here
+## ⭐ Recommended: the web app (`webapp/`) — one link for reps, one for you
+
+A self-hosted form + live dashboard built on Google Apps Script. Reps get a
+**single link** to a polished, mobile-friendly form; every submission lands
+instantly in a spreadsheet (downloadable as `.xlsx` any time); and you get a
+**live dashboard** with KPI cards, search, status/priority filters, grouping,
+and one-click status triage — no copying rows, no manual collection.
+
+### Deploy it (about 3 minutes, one time)
+
+1. Go to **[script.google.com](https://script.google.com)** → **New project**.
+2. Replace the default `Code.gs` with **`webapp/Code.gs`**, then use the
+   **+** next to *Files* → *HTML* to add **`Form`** and **`Dashboard`**, pasting
+   in `webapp/Form.html` and `webapp/Dashboard.html`.
+3. **Deploy → New deployment → Web app**:
+   - *Execute as:* **Me**
+   - *Who has access:* **Anyone with the link** (or restrict to your org)
+4. Copy the web app URL. That's it:
+   - **Send the URL to your reps** → that's the request form.
+   - **Add `?page=dashboard` to the URL** → that's your live admin dashboard.
+
+The data spreadsheet (*Demo Request Queue — Live Data*) is created in your
+Drive automatically on the first submission; the dashboard's **Open Sheet**
+button takes you straight to it, and **File → Download → .xlsx** gives you
+the Excel copy whenever you need one.
+
+### What each page does
+
+- **The form** — three guided sections (The Basics / Priority & Tracking /
+  Tell Us More), tap-to-pick priority cards, inline validation, a success
+  screen with a reference number (e.g. `REQ-0007`), and a "submit another"
+  button. Works great on phones.
+- **The dashboard** — five live KPI cards (Total / Needs Review / In
+  Progress / Completed / Critical Open), full-text search, status filter
+  chips, a priority filter, **Group by** Status / Priority / Application /
+  Requester, color-coded priority bars and status pills, and a status
+  dropdown on every request that writes back to the sheet instantly.
+
+---
+
+## Alternative: the Excel/Sheets workbooks
+
+If you'd rather stay file-based (no web app), the original workbooks are here:
 
 | File | What it does |
 |------|--------------|
+| `webapp/` | **⭐ The web form + live dashboard** (see above) |
 | `Admin-Queue.xlsx` | **The admin dashboard** in Excel — KPI cards + filterable request table |
 | `build_admin_queue.py` | Generator for `Admin-Queue.xlsx` (re-run to tweak data/colors) |
 | `build_admin_queue.gs` | **The same dashboard for Google Sheets** — paste into script.google.com and run |
@@ -50,7 +93,7 @@ printed in **View → Logs**. It builds the same dashboard as a live Google Shee
   - Priority and Status cells are dropdowns; priority columns are color-coded
     (Critical = red → Low = green); the header row is frozen with filters on.
 
-## Recommended front-end: Microsoft Forms
+## Microsoft Forms front-end (if you can't use the web app)
 
 This session can't create a live Microsoft Form for you (no access to your M365
 account, and MS Forms has no script generator), so here's the 2-minute setup:
