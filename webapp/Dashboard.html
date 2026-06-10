@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --indigo: #4f46e5;
+      --ink: #1e1b4b;
+      --slate: #64748b;
+      --line: #e2e8f0;
+      --bg: #f1f5f9;
+      --crit: #dc2626; --high: #ea580c; --med: #d97706; --low: #16a34a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg); color: var(--ink); min-height: 100vh; }
+
+    .topbar {
+      background: linear-gradient(135deg, #312e81, #4f46e5);
+      color: #fff; padding: 22px 28px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .topbar h1 { font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
+    .topbar .sub { font-size: 13px; color: rgba(255,255,255,.75); margin-top: 2px; }
+    .topbar .spacer { flex: 1; }
+    .tbtn {
+      font: inherit; font-size: 13.5px; font-weight: 600; text-decoration: none;
+      color: #fff; background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.28); border-radius: 10px;
+      padding: 9px 16px; cursor: pointer; transition: background .15s;
+    }
+    .tbtn:hover { background: rgba(255,255,255,.24); }
+    .tbtn.primary { background: #fff; color: var(--indigo); border-color: #fff; }
+    .tbtn.primary:hover { background: #eef2ff; }
+
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 26px 20px 60px; }
+
+    /* KPI cards */
+    .kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 22px; }
+    @media (max-width: 900px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+    .kpi {
+      background: #fff; border-radius: 16px; padding: 18px 20px;
+      border: 1px solid var(--line); border-top: 4px solid var(--accent, var(--indigo));
+      box-shadow: 0 1px 3px rgba(30, 27, 75, .06);
+    }
+    .kpi .n { font-size: 30px; font-weight: 800; line-height: 1.1; }
+    .kpi .t { font-size: 12.5px; font-weight: 600; color: var(--slate); margin-top: 4px; }
+
+    /* Controls */
+    .controls {
+      background: #fff; border: 1px solid var(--line); border-radius: 16px;
+      padding: 16px 18px; margin-bottom: 22px;
+      display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+      box-shadow: 0 1px 3px rgba(30, 27, 75, .06);
+    }
+    .search { position: relative; flex: 1; min-width: 220px; }
+    .search svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+      width: 16px; height: 16px; stroke: var(--slate); fill: none; stroke-width: 2;
+      stroke-linecap: round; }
+    .search input {
+      width: 100%; font: inherit; font-size: 14px; color: var(--ink);
+      border: 1.5px solid var(--line); border-radius: 10px;
+      padding: 10px 12px 10px 38px; background: #f8fafc; outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .search input:focus { border-color: var(--indigo); background: #fff;
+      box-shadow: 0 0 0 4px rgba(79,70,229,.10); }
+    .ctl { display: flex; align-items: center; gap: 8px; }
+    .ctl label { font-size: 12.5px; font-weight: 600; color: var(--slate); }
+    .ctl select {
+      font: inherit; font-size: 13.5px; font-weight: 500; color: var(--ink);
+      border: 1.5px solid var(--line); border-radius: 10px; background: #f8fafc;
+      padding: 9px 10px; outline: none; cursor: pointer;
+    }
+
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; width: 100%; }
+    .chip {
+      font: inherit; font-size: 12.5px; font-weight: 600; color: var(--slate);
+      background: #f8fafc; border: 1.5px solid var(--line); border-radius: 999px;
+      padding: 6px 14px; cursor: pointer; transition: all .12s;
+    }
+    .chip:hover { border-color: #c7d2fe; }
+    .chip.on { background: var(--indigo); border-color: var(--indigo); color: #fff; }
+
+    /* Groups & request cards */
+    .group-head {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--slate); margin: 26px 2px 12px;
+    }
+    .group-head .count { background: #e0e7ff; color: var(--indigo); border-radius: 999px;
+      padding: 2px 10px; font-size: 12px; letter-spacing: 0; }
+    .group-head::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+    .req {
+      background: #fff; border: 1px solid var(--line); border-radius: 16px;
+      padding: 18px 20px 18px 24px; margin-bottom: 12px; position: relative;
+      box-shadow: 0 1px 3px rgba(30, 27, 75, .06);
+      transition: box-shadow .15s, transform .15s;
+    }
+    .req:hover { box-shadow: 0 8px 24px -8px rgba(30, 27, 75, .18); transform: translateY(-1px); }
+    .req::before { content: ''; position: absolute; left: 0; top: 14px; bottom: 14px;
+      width: 4px; border-radius: 999px; background: var(--pcolor, var(--slate)); }
+    .req-top { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+    .req-name { font-size: 15.5px; font-weight: 700; }
+    .req-id { font-size: 12px; font-weight: 600; color: var(--slate); background: #f1f5f9;
+      border-radius: 6px; padding: 2px 8px; }
+    .req-top .spacer { flex: 1; }
+    .pill { font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 4px 12px; }
+    .pill.Critical { background: #fef2f2; color: var(--crit); }
+    .pill.High     { background: #fff7ed; color: var(--high); }
+    .pill.Medium   { background: #fffbeb; color: var(--med); }
+    .pill.Low      { background: #f0fdf4; color: var(--low); }
+    .status-sel {
+      font: inherit; font-size: 12.5px; font-weight: 700; border-radius: 999px;
+      padding: 4px 10px; border: 1.5px solid transparent; cursor: pointer; outline: none;
+    }
+    .status-sel.s-New             { background: #eef2ff; color: #4338ca; }
+    .status-sel.s-Pending-Review  { background: #fefce8; color: #a16207; }
+    .status-sel.s-Approved        { background: #ecfeff; color: #0e7490; }
+    .status-sel.s-Scheduled       { background: #f5f3ff; color: #6d28d9; }
+    .status-sel.s-In-Progress     { background: #eff6ff; color: #1d4ed8; }
+    .status-sel.s-Completed       { background: #f0fdf4; color: #15803d; }
+    .status-sel.s-Declined        { background: #f8fafc; color: #64748b; }
+
+    .req-meta { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px;
+      font-size: 13px; color: var(--slate); }
+    .req-meta b { color: var(--ink); font-weight: 600; }
+    .req-desc { margin-top: 10px; font-size: 13.5px; color: #475569; line-height: 1.55;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+      cursor: pointer; }
+    .req-desc.open { -webkit-line-clamp: unset; }
+
+    .empty { text-align: center; padding: 70px 20px; color: var(--slate); }
+    .empty .big { font-size: 42px; margin-bottom: 12px; }
+    .empty h3 { color: var(--ink); font-size: 17px; margin-bottom: 6px; }
+
+    .loading-state { text-align: center; padding: 80px 0; color: var(--slate); font-size: 14px; }
+    .loader { width: 34px; height: 34px; margin: 0 auto 16px; border-radius: 50%;
+      border: 3px solid var(--line); border-top-color: var(--indigo);
+      animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--ink); color: #fff; font-size: 13.5px; font-weight: 600;
+      border-radius: 12px; padding: 12px 20px; opacity: 0; transition: all .25s;
+      box-shadow: 0 12px 32px -8px rgba(30,27,75,.5); z-index: 50;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div>
+      <h1>Demo Request Dashboard</h1>
+      <div class="sub" id="subline">Loading…</div>
+    </div>
+    <div class="spacer"></div>
+    <button class="tbtn" id="refreshBtn">↻ Refresh</button>
+    <a class="tbtn" id="sheetLink" target="_blank" style="display:none">Open Sheet</a>
+    <a class="tbtn primary" href="<?= baseUrl ?>" target="_blank">+ New Request</a>
+  </div>
+
+  <div class="wrap">
+    <div class="kpis" id="kpis"></div>
+
+    <div class="controls">
+      <div class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+        <input id="search" type="text" placeholder="Search requests, requesters, apps, Jira #…">
+      </div>
+      <div class="ctl">
+        <label>Priority</label>
+        <select id="prioFilter"><option value="">All</option></select>
+      </div>
+      <div class="ctl">
+        <label>Group by</label>
+        <select id="groupBy">
+          <option value="status">Status</option>
+          <option value="priority">Priority</option>
+          <option value="applications">Application</option>
+          <option value="requester">Requester</option>
+          <option value="none">None (newest first)</option>
+        </select>
+      </div>
+      <div class="chips" id="statusChips"></div>
+    </div>
+
+    <div id="content">
+      <div class="loading-state"><div class="loader"></div>Loading requests…</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    var DATA = { requests: [], statuses: [], priorities: [] };
+    var state = { search: '', status: '', priority: '', groupBy: 'status' };
+    var PRIORITY_COLORS = { Critical: '#dc2626', High: '#ea580c', Medium: '#d97706', Low: '#16a34a' };
+
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    function load() {
+      document.getElementById('content').innerHTML =
+        '<div class="loading-state"><div class="loader"></div>Loading requests…</div>';
+      google.script.run
+        .withSuccessHandler(function (res) {
+          DATA = res;
+          var link = document.getElementById('sheetLink');
+          link.href = res.sheetUrl; link.style.display = '';
+          buildFilters();
+          render();
+        })
+        .withFailureHandler(function (err) {
+          document.getElementById('content').innerHTML =
+            '<div class="empty"><div class="big">⚠️</div><h3>Could not load requests</h3><div>' +
+            esc(err && err.message || err) + '</div></div>';
+        })
+        .getDashboardData();
+    }
+
+    function buildFilters() {
+      var chips = document.getElementById('statusChips');
+      chips.innerHTML = '';
+      var all = document.createElement('button');
+      all.className = 'chip' + (state.status === '' ? ' on' : '');
+      all.textContent = 'All Statuses';
+      all.onclick = function () { state.status = ''; render(); };
+      chips.appendChild(all);
+      DATA.statuses.forEach(function (s) {
+        var b = document.createElement('button');
+        b.className = 'chip' + (state.status === s ? ' on' : '');
+        b.textContent = s;
+        b.onclick = function () { state.status = (state.status === s ? '' : s); render(); };
+        chips.appendChild(b);
+      });
+
+      var sel = document.getElementById('prioFilter');
+      if (sel.options.length <= 1) {
+        DATA.priorities.forEach(function (p) {
+          var o = document.createElement('option');
+          o.value = p; o.textContent = p; sel.appendChild(o);
+        });
+      }
+    }
+
+    function filtered() {
+      var q = state.search.toLowerCase();
+      return DATA.requests.filter(function (r) {
+        if (state.status && r.status !== state.status) return false;
+        if (state.priority && r.priority !== state.priority) return false;
+        if (q) {
+          var hay = [r.id, r.requestName, r.requester, r.applications, r.jira, r.description]
+            .join(' ').toLowerCase();
+          if (hay.indexOf(q) === -1) return false;
+        }
+        return true;
+      }).sort(function (a, b) { return b.submitted.localeCompare(a.submitted); });
+    }
+
+    function renderKpis() {
+      var rs = DATA.requests;
+      function count(fn) { return rs.filter(fn).length; }
+      var cards = [
+        { t: 'Total Requests',  n: rs.length, c: '#4f46e5' },
+        { t: 'Needs Review',    n: count(function (r) { return r.status === 'New' || r.status === 'Pending Review'; }), c: '#d97706' },
+        { t: 'In Progress',     n: count(function (r) { return r.status === 'In Progress' || r.status === 'Scheduled' || r.status === 'Approved'; }), c: '#1d4ed8' },
+        { t: 'Completed',       n: count(function (r) { return r.status === 'Completed'; }), c: '#16a34a' },
+        { t: 'Critical Open',   n: count(function (r) { return r.priority === 'Critical' && r.status !== 'Completed' && r.status !== 'Declined'; }), c: '#dc2626' }
+      ];
+      document.getElementById('kpis').innerHTML = cards.map(function (k) {
+        return '<div class="kpi" style="--accent:' + k.c + '"><div class="n">' + k.n +
+               '</div><div class="t">' + k.t + '</div></div>';
+      }).join('');
+    }
+
+    function reqCard(r) {
+      var date = new Date(r.submitted);
+      var dateStr = isNaN(date) ? esc(r.submitted)
+        : date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+      var statusOpts = DATA.statuses.map(function (s) {
+        return '<option' + (s === r.status ? ' selected' : '') + '>' + esc(s) + '</option>';
+      }).join('');
+      return '<div class="req" style="--pcolor:' + (PRIORITY_COLORS[r.priority] || '#64748b') + '">' +
+        '<div class="req-top">' +
+          '<span class="req-id">' + esc(r.id) + '</span>' +
+          '<span class="req-name">' + esc(r.requestName) + '</span>' +
+          '<span class="spacer"></span>' +
+          '<span class="pill ' + esc(r.priority) + '">' + esc(r.priority) + '</span>' +
+          '<select class="status-sel s-' + esc(r.status).replace(/ /g, '-') +
+            '" data-id="' + esc(r.id) + '" onchange="changeStatus(this)">' + statusOpts + '</select>' +
+        '</div>' +
+        '<div class="req-meta">' +
+          '<span>👤 <b>' + esc(r.requester) + '</b></span>' +
+          '<span>🖥 ' + esc(r.applications) + '</span>' +
+          (r.jira ? '<span>🎫 ' + esc(r.jira) + '</span>' : '') +
+          (r.sprint ? '<span>🏁 Sprint ' + esc(r.sprint) + '</span>' : '') +
+          '<span>📅 ' + dateStr + '</span>' +
+        '</div>' +
+        (r.description ? '<div class="req-desc" onclick="this.classList.toggle(\'open\')" title="Click to expand">' +
+          esc(r.description) + '</div>' : '') +
+      '</div>';
+    }
+
+    function render() {
+      buildFilters();
+      renderKpis();
+      var rows = filtered();
+      var total = DATA.requests.length;
+      document.getElementById('subline').textContent =
+        total + ' request' + (total === 1 ? '' : 's') + ' in the queue' +
+        (rows.length !== total ? ' · showing ' + rows.length : '');
+
+      var el = document.getElementById('content');
+      if (!total) {
+        el.innerHTML = '<div class="empty"><div class="big">📭</div><h3>No requests yet</h3>' +
+          '<div>Share the form link with your reps — submissions show up here instantly.</div></div>';
+        return;
+      }
+      if (!rows.length) {
+        el.innerHTML = '<div class="empty"><div class="big">🔍</div><h3>No matching requests</h3>' +
+          '<div>Try clearing the search or filters.</div></div>';
+        return;
+      }
+
+      if (state.groupBy === 'none') {
+        el.innerHTML = rows.map(reqCard).join('');
+        return;
+      }
+
+      // Build groups, preserving a sensible order for status/priority
+      var keyOf = function (r) {
+        if (state.groupBy === 'applications') return (r.applications.split(',')[0] || 'Unspecified').trim();
+        return r[state.groupBy] || 'Unspecified';
+      };
+      var order = state.groupBy === 'status' ? DATA.statuses
+                : state.groupBy === 'priority' ? DATA.priorities : null;
+      var groups = {};
+      rows.forEach(function (r) {
+        var k = keyOf(r);
+        (groups[k] = groups[k] || []).push(r);
+      });
+      var keys = Object.keys(groups);
+      if (order) {
+        keys.sort(function (a, b) {
+          var ia = order.indexOf(a), ib = order.indexOf(b);
+          return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+        });
+      } else {
+        keys.sort();
+      }
+      el.innerHTML = keys.map(function (k) {
+        return '<div class="group-head">' + esc(k) +
+               '<span class="count">' + groups[k].length + '</span></div>' +
+               groups[k].map(reqCard).join('');
+      }).join('');
+    }
+
+    function toast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(function () { t.classList.remove('show'); }, 2200);
+    }
+
+    function changeStatus(sel) {
+      var id = sel.getAttribute('data-id');
+      var status = sel.value;
+      sel.disabled = true;
+      google.script.run
+        .withSuccessHandler(function () {
+          var r = DATA.requests.find(function (x) { return x.id === id; });
+          if (r) r.status = status;
+          toast(id + ' → ' + status);
+          render();
+        })
+        .withFailureHandler(function (err) {
+          sel.disabled = false;
+          toast('Update failed: ' + (err && err.message || err));
+        })
+        .updateStatus(id, status);
+    }
+
+    document.getElementById('search').addEventListener('input', function () {
+      state.search = this.value.trim();
+      render();
+    });
+    document.getElementById('prioFilter').addEventListener('change', function () {
+      state.priority = this.value;
+      render();
+    });
+    document.getElementById('groupBy').addEventListener('change', function () {
+      state.groupBy = this.value;
+      render();
+    });
+    document.getElementById('refreshBtn').addEventListener('click', load);
+
+    load();
+  </script>
+</body>
+</html>

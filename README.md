@@ -1,13 +1,36 @@
 # Demo Request — Form & Queue
 
-A Microsoft-based intake workflow for demo change requests:
+An intake workflow for demo change requests:
 
 **Reps submit a request → it lands in a central Queue → you triage it (priority, sprint, status).**
 
-## What's in here
+## ⭐ The web app (`docs/`) — a real site, two links
+
+A clean web form for reps + an **Admin Queue** dashboard for you, hosted free
+on GitHub Pages with the data in a free Supabase (Postgres) database:
+
+- **The form** (`docs/index.html`) — three guided sections (The Basics /
+  Priority & Tracking / Tell Us More), tap-to-pick priority cards with
+  plain-language hints, inline validation, and a success screen with a
+  reference number (e.g. `REQ-0007`). Works great on phones, no login.
+- **The Admin Queue** (`docs/dashboard.html`) — five KPI cards (Pending
+  Review / In Progress / Scheduled / Completed / Critical), full-text search,
+  status + priority filter chips, sortable columns, color-coded priority and
+  status pills, **Approve →** buttons, a **Details** modal where you edit
+  status, priority, Jira # and Sprint, and **Export CSV**.
+
+**Setup is one-time, ~5 minutes — follow [`SETUP.md`](SETUP.md).**
+Database schema lives in [`supabase/schema.sql`](supabase/schema.sql);
+the site's connection values go in [`docs/config.js`](docs/config.js).
+
+---
+
+## Alternatives also in this repo
 
 | File | What it does |
 |------|--------------|
+| `docs/` + `supabase/` | **⭐ The web form + Admin Queue dashboard** (see above) |
+| `webapp/` | Google Apps Script version (form + dashboard backed by a Google Sheet) |
 | `Admin-Queue.xlsx` | **The admin dashboard** in Excel — KPI cards + filterable request table |
 | `build_admin_queue.py` | Generator for `Admin-Queue.xlsx` (re-run to tweak data/colors) |
 | `build_admin_queue.gs` | **The same dashboard for Google Sheets** — paste into script.google.com and run |
@@ -50,7 +73,7 @@ printed in **View → Logs**. It builds the same dashboard as a live Google Shee
   - Priority and Status cells are dropdowns; priority columns are color-coded
     (Critical = red → Low = green); the header row is frozen with filters on.
 
-## Recommended front-end: Microsoft Forms
+## Microsoft Forms front-end (if you can't use the web app)
 
 This session can't create a live Microsoft Form for you (no access to your M365
 account, and MS Forms has no script generator), so here's the 2-minute setup:
