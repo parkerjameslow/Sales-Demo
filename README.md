@@ -4,53 +4,33 @@ An intake workflow for demo change requests:
 
 **Reps submit a request → it lands in a central Queue → you triage it (priority, sprint, status).**
 
-## ⭐ Recommended: the web app (`webapp/`) — one link for reps, one for you
+## ⭐ The web app (`docs/`) — a real site, two links
 
-A self-hosted form + live dashboard built on Google Apps Script. Reps get a
-**single link** to a polished, mobile-friendly form; every submission lands
-instantly in a spreadsheet (downloadable as `.xlsx` any time); and you get a
-**live dashboard** with KPI cards, search, status/priority filters, grouping,
-and one-click status triage — no copying rows, no manual collection.
+A clean web form for reps + an **Admin Queue** dashboard for you, hosted free
+on GitHub Pages with the data in a free Supabase (Postgres) database:
 
-### Deploy it (about 3 minutes, one time)
+- **The form** (`docs/index.html`) — three guided sections (The Basics /
+  Priority & Tracking / Tell Us More), tap-to-pick priority cards with
+  plain-language hints, inline validation, and a success screen with a
+  reference number (e.g. `REQ-0007`). Works great on phones, no login.
+- **The Admin Queue** (`docs/dashboard.html`) — five KPI cards (Pending
+  Review / In Progress / Scheduled / Completed / Critical), full-text search,
+  status + priority filter chips, sortable columns, color-coded priority and
+  status pills, **Approve →** buttons, a **Details** modal where you edit
+  status, priority, Jira # and Sprint, and **Export CSV**.
 
-1. Go to **[script.google.com](https://script.google.com)** → **New project**.
-2. Replace the default `Code.gs` with **`webapp/Code.gs`**, then use the
-   **+** next to *Files* → *HTML* to add **`Form`** and **`Dashboard`**, pasting
-   in `webapp/Form.html` and `webapp/Dashboard.html`.
-3. **Deploy → New deployment → Web app**:
-   - *Execute as:* **Me**
-   - *Who has access:* **Anyone with the link** (or restrict to your org)
-4. Copy the web app URL. That's it:
-   - **Send the URL to your reps** → that's the request form.
-   - **Add `?page=dashboard` to the URL** → that's your live admin dashboard.
-
-The data spreadsheet (*Demo Request Queue — Live Data*) is created in your
-Drive automatically on the first submission; the dashboard's **Open Sheet**
-button takes you straight to it, and **File → Download → .xlsx** gives you
-the Excel copy whenever you need one.
-
-### What each page does
-
-- **The form** — three guided sections (The Basics / Priority & Tracking /
-  Tell Us More), tap-to-pick priority cards, inline validation, a success
-  screen with a reference number (e.g. `REQ-0007`), and a "submit another"
-  button. Works great on phones.
-- **The dashboard** — five live KPI cards (Total / Needs Review / In
-  Progress / Completed / Critical Open), full-text search, status filter
-  chips, a priority filter, **Group by** Status / Priority / Application /
-  Requester, color-coded priority bars and status pills, and a status
-  dropdown on every request that writes back to the sheet instantly.
+**Setup is one-time, ~5 minutes — follow [`SETUP.md`](SETUP.md).**
+Database schema lives in [`supabase/schema.sql`](supabase/schema.sql);
+the site's connection values go in [`docs/config.js`](docs/config.js).
 
 ---
 
-## Alternative: the Excel/Sheets workbooks
-
-If you'd rather stay file-based (no web app), the original workbooks are here:
+## Alternatives also in this repo
 
 | File | What it does |
 |------|--------------|
-| `webapp/` | **⭐ The web form + live dashboard** (see above) |
+| `docs/` + `supabase/` | **⭐ The web form + Admin Queue dashboard** (see above) |
+| `webapp/` | Google Apps Script version (form + dashboard backed by a Google Sheet) |
 | `Admin-Queue.xlsx` | **The admin dashboard** in Excel — KPI cards + filterable request table |
 | `build_admin_queue.py` | Generator for `Admin-Queue.xlsx` (re-run to tweak data/colors) |
 | `build_admin_queue.gs` | **The same dashboard for Google Sheets** — paste into script.google.com and run |

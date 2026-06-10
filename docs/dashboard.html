@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Queue — Demo Requests</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #1f2a44;
+      --blue: #2563eb;
+      --slate: #5b6b85;
+      --line: #dde5f0;
+      --bg: #f3f6fb;
+      --crit: #dc2626; --high: #ea580c; --med: #ca8a04; --low: #16a34a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg); color: var(--navy); min-height: 100vh; }
+    .wrap { max-width: 1352px; margin: 0 auto; padding: 30px 22px 70px; }
+
+    .pagehead { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+    .pagehead h1 { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
+    .pagehead .sub { font-size: 14px; color: var(--slate); margin-top: 5px; }
+    .pagehead .spacer { flex: 1; }
+    .hbtn {
+      font: inherit; font-size: 14px; font-weight: 600; text-decoration: none;
+      color: var(--navy); background: #fff; border: 1.5px solid var(--line);
+      border-radius: 10px; padding: 10px 18px; cursor: pointer; transition: all .15s;
+      display: inline-block;
+    }
+    .hbtn:hover { border-color: #b9c8de; }
+    .hbtn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .hbtn.primary:hover { background: #1d4ed8; }
+
+    .kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 22px; }
+    @media (max-width: 980px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+    .kpi {
+      background: #fff; border-radius: 12px; padding: 18px 22px;
+      border: 1px solid var(--line); border-top: 4px solid var(--accent, var(--blue));
+      box-shadow: 0 1px 3px rgba(31, 42, 68, .05);
+    }
+    .kpi .t { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--slate); }
+    .kpi .n { font-size: 34px; font-weight: 800; line-height: 1.2; margin: 4px 0 2px;
+      color: var(--num, var(--navy)); }
+    .kpi .s { font-size: 13px; color: var(--slate); }
+
+    .controls {
+      background: #fff; border: 1px solid var(--line); border-radius: 14px;
+      padding: 16px 18px; margin-bottom: 20px;
+      display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+      box-shadow: 0 1px 3px rgba(31, 42, 68, .05);
+    }
+    .search { position: relative; flex: 1; min-width: 240px; }
+    .search svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      width: 16px; height: 16px; stroke: var(--slate); fill: none; stroke-width: 2; stroke-linecap: round; }
+    .search input {
+      width: 100%; font: inherit; font-size: 14.5px; color: var(--navy);
+      border: 1.5px solid var(--line); border-radius: 10px;
+      padding: 11px 14px 11px 40px; background: #f6f8fc; outline: none;
+      transition: border-color .15s, box-shadow .15s, background .15s;
+    }
+    .search input:focus { border-color: var(--blue); background: #fff;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, .10); }
+    .ctl-label { font-size: 13px; font-weight: 600; color: var(--slate); }
+    .chiprow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .chip {
+      font: inherit; font-size: 13px; font-weight: 600; color: var(--slate);
+      background: #fff; border: 1.5px solid var(--line); border-radius: 999px;
+      padding: 7px 15px; cursor: pointer; transition: all .12s;
+    }
+    .chip:hover { border-color: #b9c8de; }
+    .chip.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .chip.p-Critical { color: var(--crit); border-color: #fecaca; }
+    .chip.p-High     { color: var(--high); border-color: #fed7aa; }
+    .chip.p-Medium   { color: #a16207;     border-color: #fde68a; }
+    .chip.p-Low      { color: var(--low);  border-color: #bbf7d0; }
+    .chip.p-Critical.on { background: var(--crit); border-color: var(--crit); color: #fff; }
+    .chip.p-High.on     { background: var(--high); border-color: var(--high); color: #fff; }
+    .chip.p-Medium.on   { background: var(--med);  border-color: var(--med);  color: #fff; }
+    .chip.p-Low.on      { background: var(--low);  border-color: var(--low);  color: #fff; }
+
+    .tablecard { background: #fff; border: 1px solid var(--line); border-radius: 14px;
+      box-shadow: 0 1px 3px rgba(31, 42, 68, .05); overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 1130px; }
+    td.actcell { min-width: 215px; }
+    thead th {
+      font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--slate); text-align: left; padding: 14px 12px;
+      border-bottom: 1px solid var(--line); background: #fafbfe; white-space: nowrap;
+    }
+    thead th.sortable { cursor: pointer; user-select: none; }
+    thead th.sortable:hover { color: var(--navy); }
+    thead th .arrow { font-size: 10px; margin-left: 4px; }
+    tbody td { padding: 16px 12px; border-bottom: 1px solid #edf1f8; vertical-align: middle; font-size: 14px; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: #fafbfe; }
+    td.reqcell { min-width: 260px; }
+    .rname { font-weight: 700; font-size: 14.5px; }
+    .rsub { font-size: 12.5px; color: var(--slate); margin-top: 3px; }
+    .ref { font-size: 12px; font-weight: 600; color: var(--slate); }
+    .apppill {
+      display: inline-block; font-size: 12px; font-weight: 600; color: var(--blue);
+      background: #eff6ff; border-radius: 7px; padding: 3px 10px; margin: 2px 4px 2px 0;
+      white-space: nowrap;
+    }
+    .prio { font-weight: 700; font-size: 13.5px; white-space: nowrap; }
+    .prio::before { content: ''; display: inline-block; width: 8px; height: 8px;
+      border-radius: 50%; margin-right: 7px; background: var(--pc, var(--slate)); }
+    .prio.Critical { color: var(--crit); --pc: var(--crit); }
+    .prio.High     { color: var(--high); --pc: var(--high); }
+    .prio.Medium   { color: #a16207;     --pc: var(--med); }
+    .prio.Low      { color: var(--low);  --pc: var(--low); }
+    .status { display: inline-block; font-size: 12.5px; font-weight: 700;
+      border-radius: 999px; padding: 5px 13px; white-space: nowrap; }
+    .status::before { content: '●'; font-size: 9px; margin-right: 6px; vertical-align: 1px; }
+    .s-New          { background: #f1f5f9; color: #64748b; }
+    .s-In-Review    { background: #eff6ff; color: #1d4ed8; }
+    .s-Approved     { background: #f5f3ff; color: #7c3aed; }
+    .s-Scheduled    { background: #ecfeff; color: #0e7490; }
+    .s-In-Progress  { background: #fff7ed; color: #c2410c; }
+    .s-Completed    { background: #f0fdf4; color: #15803d; }
+    .s-Declined     { background: #fef2f2; color: #b91c1c; }
+    td.nowrap { white-space: nowrap; color: var(--slate); font-weight: 500; }
+    .rowbtns { display: flex; gap: 8px; justify-content: flex-end; min-width: 200px; }
+    .btn {
+      font: inherit; font-size: 13px; font-weight: 600; border-radius: 9px;
+      padding: 8px 16px; cursor: pointer; transition: all .12s; white-space: nowrap;
+      color: var(--navy); background: #fff; border: 1.5px solid var(--line);
+    }
+    .btn:hover { border-color: #b9c8de; }
+    .btn.approve { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .btn.approve:hover { background: #1d4ed8; }
+    .btn:disabled { opacity: .5; cursor: default; }
+
+    .empty { text-align: center; padding: 80px 20px; color: var(--slate); }
+    .empty .big { font-size: 40px; margin-bottom: 12px; }
+    .empty h3 { color: var(--navy); font-size: 17px; margin-bottom: 6px; }
+    .loading-state { text-align: center; padding: 90px 0; color: var(--slate); font-size: 14px; }
+    .loader { width: 34px; height: 34px; margin: 0 auto 16px; border-radius: 50%;
+      border: 3px solid var(--line); border-top-color: var(--blue);
+      animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .banner {
+      display: none; margin-bottom: 20px; padding: 13px 16px; border-radius: 10px;
+      background: #fff1f2; border: 1px solid #fecdd3; color: #9f1239;
+      font-size: 14px; font-weight: 500;
+    }
+    .banner.show { display: block; }
+
+    /* Details modal */
+    .overlay { position: fixed; inset: 0; background: rgba(31, 42, 68, .5);
+      display: none; align-items: flex-start; justify-content: center;
+      padding: 48px 16px; overflow-y: auto; z-index: 40; }
+    .overlay.show { display: flex; }
+    .modal { background: #fff; border-radius: 16px; max-width: 640px; width: 100%;
+      box-shadow: 0 30px 80px -20px rgba(31, 42, 68, .5);
+      animation: rise .22s ease-out; }
+    @keyframes rise { from { transform: translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .modal-head { display: flex; align-items: flex-start; gap: 12px;
+      padding: 24px 28px 18px; border-bottom: 1px solid var(--line); }
+    .modal-head h2 { font-size: 18px; font-weight: 800; flex: 1; }
+    .modal-head .ref { margin-top: 4px; }
+    .close { font: inherit; font-size: 22px; line-height: 1; color: var(--slate);
+      background: none; border: none; cursor: pointer; padding: 2px 6px; }
+    .modal-body { padding: 22px 28px; }
+    .mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+    @media (max-width: 560px) { .mgrid { grid-template-columns: 1fr; } }
+    .mfield label { display: block; font-size: 12px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--slate); margin-bottom: 6px; }
+    .mfield .val { font-size: 14.5px; font-weight: 600; }
+    .mfield select, .mfield input {
+      width: 100%; font: inherit; font-size: 14px; color: var(--navy);
+      border: 1.5px solid var(--line); border-radius: 9px; padding: 9px 11px;
+      background: #fff; outline: none;
+    }
+    .mfield select:focus, .mfield input:focus { border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, .10); }
+    .mdesc { background: #f6f8fc; border: 1px solid var(--line); border-radius: 10px;
+      padding: 14px 16px; font-size: 14px; line-height: 1.6; color: #3b4862;
+      white-space: pre-wrap; }
+    .modal-foot { display: flex; gap: 10px; justify-content: flex-end;
+      padding: 18px 28px 24px; border-top: 1px solid var(--line); }
+
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--navy); color: #fff; font-size: 13.5px; font-weight: 600;
+      border-radius: 12px; padding: 12px 22px; opacity: 0; transition: all .25s;
+      box-shadow: 0 12px 32px -8px rgba(31, 42, 68, .5); z-index: 60;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="pagehead">
+      <div>
+        <h1>Admin Queue</h1>
+        <div class="sub" id="subline">Requests waiting for your review.</div>
+      </div>
+      <div class="spacer"></div>
+      <button class="hbtn" id="refreshBtn">↻ Refresh</button>
+      <button class="hbtn" id="exportBtn">Export CSV</button>
+      <a class="hbtn primary" href="index.html" target="_blank">+ New Request</a>
+    </div>
+
+    <div id="banner" class="banner"></div>
+    <div class="kpis" id="kpis"></div>
+
+    <div class="controls">
+      <div class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+        <input id="search" type="text" placeholder="Search requests, applications, requesters…">
+      </div>
+      <div class="chiprow">
+        <span class="ctl-label">Status</span>
+        <span id="statusChips"></span>
+      </div>
+      <div class="chiprow">
+        <span class="ctl-label">Priority</span>
+        <span id="prioChips"></span>
+      </div>
+    </div>
+
+    <div class="tablecard" id="tablecard">
+      <div class="loading-state"><div class="loader"></div>Loading requests…</div>
+    </div>
+  </div>
+
+  <!-- Details modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="modal-head">
+        <div style="flex:1">
+          <h2 id="mTitle"></h2>
+          <div class="ref" id="mRef"></div>
+        </div>
+        <button class="close" id="mClose" title="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="mgrid">
+          <div class="mfield"><label>Requester</label><div class="val" id="mRequester"></div></div>
+          <div class="mfield"><label>Submitted</label><div class="val" id="mSubmitted"></div></div>
+          <div class="mfield"><label>Application(s)</label><div class="val" id="mApps"></div></div>
+          <div class="mfield"><label>Date Requested</label><div class="val" id="mDateReq"></div></div>
+          <div class="mfield"><label>Status</label><select id="mStatus"></select></div>
+          <div class="mfield"><label>Priority</label><select id="mPriority"></select></div>
+          <div class="mfield"><label>Jira #</label><input id="mJira" type="text" placeholder="e.g. DEMO-482"></div>
+          <div class="mfield"><label>Sprint #</label><input id="mSprint" type="text" placeholder="e.g. Sprint 44"></div>
+        </div>
+        <div class="mfield"><label>Full Description</label></div>
+        <div class="mdesc" id="mDesc"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" id="mCancel">Cancel</button>
+        <button class="btn approve" id="mSave">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="config.js"></script>
+  <script src="api.js"></script>
+  <script>
+    var STATUSES = ['New', 'In Review', 'Approved', 'Scheduled', 'In Progress', 'Completed', 'Declined'];
+    var PRIORITIES = ['Critical', 'High', 'Medium', 'Low'];
+    var PRIORITY_RANK = { Critical: 0, High: 1, Medium: 2, Low: 3 };
+
+    var DATA = [];
+    var state = { search: '', status: '', priority: '', sortKey: 'created_at', sortDir: -1 };
+    var openId = null;
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+    function fmtDate(iso) {
+      if (!iso) return '—';
+      var d = new Date(iso);
+      return isNaN(d) ? esc(iso) : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+    function fmtDateFull(iso) {
+      if (!iso) return '—';
+      var d = new Date(iso);
+      return isNaN(d) ? esc(iso)
+        : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    function statusClass(s) { return 's-' + s.replace(/ /g, '-'); }
+    function toast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(function () { t.classList.remove('show'); }, 2200);
+    }
+
+    function load() {
+      if (!API.isConfigured()) {
+        document.getElementById('banner').textContent =
+          'Setup needed: paste your Supabase URL and anon key into docs/config.js (see SETUP.md).';
+        document.getElementById('banner').classList.add('show');
+        document.getElementById('tablecard').innerHTML =
+          '<div class="empty"><div class="big">⚙️</div><h3>Not connected yet</h3>' +
+          '<div>Finish the 5-minute setup in SETUP.md and refresh.</div></div>';
+        document.getElementById('kpis').innerHTML = '';
+        return;
+      }
+      document.getElementById('tablecard').innerHTML =
+        '<div class="loading-state"><div class="loader"></div>Loading requests…</div>';
+      API.listRequests().then(function (rows) {
+        DATA = rows;
+        render();
+      }).catch(function (err) {
+        document.getElementById('tablecard').innerHTML =
+          '<div class="empty"><div class="big">⚠️</div><h3>Could not load requests</h3><div>' +
+          esc(err.message) + '</div></div>';
+      });
+    }
+
+    function buildChips() {
+      var sc = document.getElementById('statusChips');
+      sc.innerHTML = '';
+      var all = document.createElement('button');
+      all.className = 'chip' + (state.status === '' ? ' on' : '');
+      all.textContent = 'All';
+      all.onclick = function () { state.status = ''; render(); };
+      sc.appendChild(all);
+      STATUSES.forEach(function (s) {
+        var b = document.createElement('button');
+        b.className = 'chip' + (state.status === s ? ' on' : '');
+        b.textContent = s;
+        b.onclick = function () { state.status = (state.status === s ? '' : s); render(); };
+        sc.appendChild(b);
+      });
+
+      var pc = document.getElementById('prioChips');
+      pc.innerHTML = '';
+      PRIORITIES.forEach(function (p) {
+        var b = document.createElement('button');
+        b.className = 'chip p-' + p + (state.priority === p ? ' on' : '');
+        b.textContent = p;
+        b.onclick = function () { state.priority = (state.priority === p ? '' : p); render(); };
+        pc.appendChild(b);
+      });
+    }
+
+    function filtered() {
+      var q = state.search.toLowerCase();
+      var rows = DATA.filter(function (r) {
+        if (state.status && r.status !== state.status) return false;
+        if (state.priority && r.priority !== state.priority) return false;
+        if (q) {
+          var hay = [API.refOf(r.id), r.request_name, r.requester, r.applications,
+                     r.jira, r.sprint, r.description].join(' ').toLowerCase();
+          if (hay.indexOf(q) === -1) return false;
+        }
+        return true;
+      });
+      var k = state.sortKey, dir = state.sortDir;
+      rows.sort(function (a, b) {
+        var va, vb;
+        if (k === 'priority') { va = PRIORITY_RANK[a.priority]; vb = PRIORITY_RANK[b.priority]; }
+        else if (k === 'status') { va = STATUSES.indexOf(a.status); vb = STATUSES.indexOf(b.status); }
+        else { va = a[k] || ''; vb = b[k] || ''; }
+        return (va < vb ? -1 : va > vb ? 1 : 0) * dir;
+      });
+      return rows;
+    }
+
+    function renderKpis() {
+      function count(fn) { return DATA.filter(fn).length; }
+      var cards = [
+        { t: 'Pending Review', s: 'Need your decision', c: '#2563eb', red: false,
+          n: count(function (r) { return r.status === 'New' || r.status === 'In Review'; }) },
+        { t: 'In Progress', s: 'Being prepared', c: '#ea580c', red: false,
+          n: count(function (r) { return r.status === 'In Progress' || r.status === 'Approved'; }) },
+        { t: 'Scheduled', s: 'On the calendar', c: '#0e7490', red: false,
+          n: count(function (r) { return r.status === 'Scheduled'; }) },
+        { t: 'Completed', s: 'Done and delivered', c: '#16a34a', red: false,
+          n: count(function (r) { return r.status === 'Completed'; }) },
+        { t: 'Critical', s: 'Needs immediate action', c: '#dc2626', red: true,
+          n: count(function (r) { return r.priority === 'Critical' &&
+              r.status !== 'Completed' && r.status !== 'Declined'; }) }
+      ];
+      document.getElementById('kpis').innerHTML = cards.map(function (k) {
+        return '<div class="kpi" style="--accent:' + k.c + (k.red && k.n ? ';--num:#dc2626' : '') +
+               '"><div class="t">' + k.t + '</div><div class="n">' + k.n +
+               '</div><div class="s">' + k.s + '</div></div>';
+      }).join('');
+    }
+
+    function headerCell(label, key) {
+      if (!key) return '<th>' + label + '</th>';
+      var arrow = state.sortKey === key ? (state.sortDir === 1 ? '▲' : '▼') : '↕';
+      return '<th class="sortable" data-key="' + key + '">' + label +
+             '<span class="arrow">' + arrow + '</span></th>';
+    }
+
+    function rowHtml(r) {
+      var apps = String(r.applications || '').split(',').map(function (a) { return a.trim(); })
+        .filter(Boolean).map(function (a) { return '<span class="apppill">' + esc(a) + '</span>'; }).join('');
+      var canApprove = r.status === 'New' || r.status === 'In Review';
+      return '<tr>' +
+        '<td class="reqcell"><div class="rname">' + esc(r.request_name) + '</div>' +
+          '<div class="rsub">' + API.refOf(r.id) + '</div></td>' +
+        '<td class="nowrap">' + esc(r.requester) + '</td>' +
+        '<td>' + apps + '</td>' +
+        '<td><span class="prio ' + esc(r.priority) + '">' + esc(r.priority) + '</span></td>' +
+        '<td><span class="status ' + statusClass(r.status) + '">' + esc(r.status) + '</span></td>' +
+        '<td class="nowrap">' + (r.jira ? esc(r.jira) : '—') + '</td>' +
+        '<td class="nowrap">' + (r.sprint ? esc(r.sprint) : '—') + '</td>' +
+        '<td class="nowrap">' + fmtDate(r.created_at) + '</td>' +
+        '<td class="actcell"><div class="rowbtns">' +
+          '<button class="btn" data-act="details" data-id="' + r.id + '">Details</button>' +
+          (canApprove ? '<button class="btn approve" data-act="approve" data-id="' + r.id + '">Approve →</button>' : '') +
+        '</div></td>' +
+      '</tr>';
+    }
+
+    function render() {
+      buildChips();
+      renderKpis();
+      var rows = filtered();
+      document.getElementById('subline').textContent =
+        DATA.length + ' request' + (DATA.length === 1 ? '' : 's') + ' in the queue' +
+        (rows.length !== DATA.length ? ' · showing ' + rows.length : '') +
+        '. Approve to move them through the pipeline.';
+
+      var el = document.getElementById('tablecard');
+      if (!DATA.length) {
+        el.innerHTML = '<div class="empty"><div class="big">📭</div><h3>No requests yet</h3>' +
+          '<div>Share the form link with your reps — submissions show up here instantly.</div></div>';
+        return;
+      }
+      if (!rows.length) {
+        el.innerHTML = '<div class="empty"><div class="big">🔍</div><h3>No matching requests</h3>' +
+          '<div>Try clearing the search or filters.</div></div>';
+        return;
+      }
+      el.innerHTML = '<table><thead><tr>' +
+        headerCell('Request', 'request_name') +
+        headerCell('Requester', 'requester') +
+        '<th>Application(s)</th>' +
+        headerCell('Priority', 'priority') +
+        headerCell('Status', 'status') +
+        '<th>Jira #</th><th>Sprint</th>' +
+        headerCell('Submitted', 'created_at') +
+        '<th style="text-align:right">Actions</th>' +
+        '</tr></thead><tbody>' + rows.map(rowHtml).join('') + '</tbody></table>';
+
+      el.querySelectorAll('th.sortable').forEach(function (th) {
+        th.onclick = function () {
+          var k = th.getAttribute('data-key');
+          if (state.sortKey === k) state.sortDir = -state.sortDir;
+          else { state.sortKey = k; state.sortDir = k === 'created_at' ? -1 : 1; }
+          render();
+        };
+      });
+      el.querySelectorAll('button[data-act]').forEach(function (b) {
+        var id = Number(b.getAttribute('data-id'));
+        if (b.getAttribute('data-act') === 'details') b.onclick = function () { openModal(id); };
+        else b.onclick = function () { approve(id, b); };
+      });
+    }
+
+    function approve(id, btn) {
+      btn.disabled = true;
+      API.updateRequest(id, { status: 'Approved' }).then(function (row) {
+        var i = DATA.findIndex(function (r) { return r.id === id; });
+        if (i !== -1) DATA[i] = row;
+        toast(API.refOf(id) + ' approved');
+        render();
+      }).catch(function (err) {
+        btn.disabled = false;
+        toast('Update failed: ' + err.message);
+      });
+    }
+
+    // ── Details modal ──
+    function fillSelect(sel, options, value) {
+      sel.innerHTML = options.map(function (o) {
+        return '<option' + (o === value ? ' selected' : '') + '>' + esc(o) + '</option>';
+      }).join('');
+    }
+    function openModal(id) {
+      var r = DATA.find(function (x) { return x.id === id; });
+      if (!r) return;
+      openId = id;
+      document.getElementById('mTitle').textContent = r.request_name;
+      document.getElementById('mRef').textContent = API.refOf(r.id);
+      document.getElementById('mRequester').textContent = r.requester;
+      document.getElementById('mSubmitted').textContent = fmtDateFull(r.created_at);
+      document.getElementById('mApps').textContent = r.applications;
+      document.getElementById('mDateReq').textContent = fmtDateFull(r.date_requested);
+      fillSelect(document.getElementById('mStatus'), STATUSES, r.status);
+      fillSelect(document.getElementById('mPriority'), PRIORITIES, r.priority);
+      document.getElementById('mJira').value = r.jira || '';
+      document.getElementById('mSprint').value = r.sprint || '';
+      document.getElementById('mDesc').textContent = r.description;
+      document.getElementById('overlay').classList.add('show');
+    }
+    function closeModal() {
+      openId = null;
+      document.getElementById('overlay').classList.remove('show');
+    }
+    document.getElementById('mClose').onclick = closeModal;
+    document.getElementById('mCancel').onclick = closeModal;
+    document.getElementById('overlay').addEventListener('click', function (e) {
+      if (e.target === this) closeModal();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeModal();
+    });
+    document.getElementById('mSave').onclick = function () {
+      if (openId == null) return;
+      var btn = this;
+      btn.disabled = true;
+      var patch = {
+        status: document.getElementById('mStatus').value,
+        priority: document.getElementById('mPriority').value,
+        jira: document.getElementById('mJira').value.trim() || null,
+        sprint: document.getElementById('mSprint').value.trim() || null
+      };
+      API.updateRequest(openId, patch).then(function (row) {
+        var i = DATA.findIndex(function (r) { return r.id === row.id; });
+        if (i !== -1) DATA[i] = row;
+        btn.disabled = false;
+        toast(API.refOf(row.id) + ' updated');
+        closeModal();
+        render();
+      }).catch(function (err) {
+        btn.disabled = false;
+        toast('Save failed: ' + err.message);
+      });
+    };
+
+    // ── CSV export ──
+    document.getElementById('exportBtn').onclick = function () {
+      var cols = ['Ref', 'Submitted', 'Request Name', 'Requester', 'Date Requested',
+                  'Application(s)', 'Jira #', 'Sprint #', 'Priority', 'Status', 'Description'];
+      function cell(v) {
+        v = String(v == null ? '' : v);
+        return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+      }
+      var lines = [cols.join(',')].concat(filtered().map(function (r) {
+        return [API.refOf(r.id), r.created_at, r.request_name, r.requester, r.date_requested,
+                r.applications, r.jira, r.sprint, r.priority, r.status, r.description]
+          .map(cell).join(',');
+      }));
+      var blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'demo-requests-' + new Date().toISOString().slice(0, 10) + '.csv';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    };
+
+    document.getElementById('search').addEventListener('input', function () {
+      state.search = this.value.trim();
+      render();
+    });
+    document.getElementById('refreshBtn').onclick = load;
+
+    load();
+  </script>
+</body>
+</html>
